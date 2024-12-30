@@ -1,0 +1,51 @@
+import random
+import copy
+
+class Hat:
+    def __init__(self, **balls):
+        # Initialize the hat with the given balls (color and count)
+        self.contents = []
+        for color, count in balls.items():
+            self.contents.extend([color] * count)
+
+    def draw(self, num_balls):
+        # If there are not enough balls to draw, draw as many as possible
+        if num_balls > len(self.contents):
+            num_balls = len(self.contents)
+        
+        # Randomly select the balls and remove them from the contents
+        drawn_balls = random.sample(self.contents, num_balls)
+        
+        # Remove the drawn balls from the hat
+        for ball in drawn_balls:
+            self.contents.remove(ball)
+        
+        return drawn_balls
+
+def experiment(hat, expected_balls, num_balls_drawn, num_experiments):
+    success_count = 0
+    
+    # Perform the experiment num_experiments times
+    for _ in range(num_experiments):
+        # Make a deep copy of the hat for each experiment to avoid modifying the original
+        hat_copy = copy.deepcopy(hat)
+        drawn_balls = hat_copy.draw(num_balls_drawn)
+        
+        # Count how many of each color is drawn
+        ball_counts = {color: drawn_balls.count(color) for color in expected_balls}
+        
+        # Check if the drawn balls meet the expected counts
+        if all(ball_counts.get(color, 0) >= count for color, count in expected_balls.items()):
+            success_count += 1
+    
+    # Return the probability of success
+    return success_count / num_experiments
+
+# Example usage:
+hat = Hat(black=6, red=4, green=3)
+probability = experiment(hat=hat,
+                         expected_balls={'red': 2, 'green': 1},
+                         num_balls_drawn=5,
+                         num_experiments=2000)
+
+print(probability)
